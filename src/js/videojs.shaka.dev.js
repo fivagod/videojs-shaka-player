@@ -36,6 +36,11 @@
       })
 
       this.shakaPlayer.load(source.src).then(function() {
+      if(player.shakaPlayer.isLive()){
+          player.duration = function() {
+            return Infinity; // the amount of seconds of video 
+          }
+        }
         player.initShakaMenus();
       });
     },
