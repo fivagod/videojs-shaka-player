@@ -1,8 +1,17 @@
 (function() {
   'use strict';
 
-  var Html5 = videojs.getComponent('Html5');
+  var Html5;
+  if (typeof videojs.getTech === 'function') {
+      Html5 = videojs.getTech('Html5');
+  } else if (typeof videojs.getComponent === 'function') {
+      Html5 = videojs.getComponent('Html5');
+  } else {
+      console.error('Not supported version if video.js');
 
+      return;
+  }
+  
   var ShakaTech = videojs.extend(Html5, {
     constructor: function(options, ready) {
       var player = this;
@@ -40,7 +49,7 @@
       playerEL.className += ' vjs-shaka';
 
       var shakaButton = document.createElement('div');
-      shakaButton.setAttribute('class', 'vjs-shaka-button vjs-menu-button vjs-menu-button-popup vjs-control vjs-icon-cog');
+      shakaButton.setAttribute('class', 'vjs-shaka-button vjs-menu-button vjs-menu-button-popup vjs-control vjs-button vjs-menu-button-levels');
 
       var shakaMenu = document.createElement('div');
       shakaMenu.setAttribute('class', 'vjs-menu');
@@ -48,9 +57,10 @@
 
       var shakaMenuContent = document.createElement('ul');
       shakaMenuContent.setAttribute('class', 'vjs-menu-content');
+      shakaMenuContent.setAttribute('style', 'overflow-y: hidden;');
       shakaMenu.appendChild(shakaMenuContent);
 
-      var videoTracks = shakaPlayer.getTracks();
+      var videoTracks = shakaPlayer.getVariantTracks();
 
       var el = document.createElement('li');
       el.setAttribute('class', 'vjs-menu-item vjs-selected');
@@ -66,18 +76,23 @@
         shakaPlayer.configure({abr: {enabled: true}});
       });
       shakaMenuContent.appendChild(el);
-
+      var sortedTracks = {};
       for (var i = 0; i < videoTracks.length; ++i) {
-        if (videoTracks[i].type == "video") {
+        if(typeof sortedTracks[videoTracks[i].height] == 'undefined' || sortedTracks[videoTracks[i].height].audioBandwidth < videoTracks[i].audioBandwidth) {
+          sortedTracks[videoTracks[i].height] = videoTracks[i];
+        }
+      }
+      for (var h in sortedTracks) {
           (function() {
-            var track = videoTracks[i];
-            var rate = (videoTracks[i].bandwidth / 1024).toFixed(0);
-            var height = videoTracks[i].height;
+            var track = sortedTracks[h];
+            var rate = (sortedTracks[h].bandwidth / 1024).toFixed(0);
+            var arate = (sortedTracks[h].audioBandwidth / 1024).toFixed(0);
+            var height = sortedTracks[h].height;
             var el = document.createElement('li');
             el.setAttribute('class', 'vjs-menu-item');
             el.setAttribute('data-val', rate);
             var label = document.createElement('span');
-            setInnerText(label, height + "p (" + rate + "k)");
+            setInnerText(label, height + 'p' );// + "p (" + rate + "k)");
             el.appendChild(label);
             el.addEventListener('click', function() {
               var selected = shakaMenuContent.querySelector('.vjs-selected');
@@ -93,7 +108,6 @@
             })
             shakaMenuContent.appendChild(el);
           }())
-        }
       }
       var controlBar = playerEL.parentNode.querySelector('.vjs-control-bar');
 
