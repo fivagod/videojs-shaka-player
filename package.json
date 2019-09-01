@@ -33,7 +33,7 @@
     "express": "4.13.4",
     "express-http-proxy": "0.6.0",
     "nodemon": "1.9.1",
-    "shaka-player": "^2.4.0",
+    "shaka-player": "^2.5.5",
     "uglify-js": "^3.4.0",
     "video.js": "^5.11.9"
   }

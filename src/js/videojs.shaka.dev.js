@@ -127,7 +127,7 @@
   };
 
   ShakaTech.canPlaySource = function(srcObj) {
-    if (srcObj.type === 'application/dash+xml') {
+    if (srcObj.type === 'application/dash+xml' || srcObj.type === 'application/vnd.ms-sstr+xml') {
       return 'maybe';
     } else {
       return '';
